@@ -1,2 +1,4 @@
 ---
 # defaults file for dbserver
+mysql_user: dbuser
+mysql_password: dbpassword
