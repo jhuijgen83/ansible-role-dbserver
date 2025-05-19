@@ -1,38 +1,46 @@
-Role Name
-=========
+Database Server Role
+====================
 
-A brief description of the role goes here.
+Deze Ansible rol installeert de MySQL-server op Ubuntu 24.04, stelt een externe verbinding in en maakt een gebruiker aan met opgegeven rechten.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ubuntu 24.04 met `apt`
+- Poort 3306 moet bereikbaar zijn voor clients (bijv. vanaf je webservers)
+- MySQL roottoegang via `unix_socket` (standaard bij Ubuntu)
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variabele         | Default waarde | Beschrijving                                        |
+|-------------------|----------------|-----------------------------------------------------|
+| `mysql_user`      | `dbuser`       | De gebruikersnaam die wordt aangemaakt              |
+| `mysql_password`  | `dbpassword`   | Het wachtwoord van deze gebruiker                   |
+
+Deze variabelen zijn gedefinieerd in `defaults/main.yml`, maar je kunt ze eenvoudig overschrijven in je playbook of via `group_vars`.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- Deze rol vereist dat de pakketten `mysql-server` en `python3-pymysql` geïnstalleerd worden (gebeurt automatisch).
+- De MySQL-service wordt automatisch gestart en geconfigureerd om verbindingen van buitenaf toe te staan (`bind-address = 0.0.0.0`).
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+`example.yaml`
+- name: Installeer database via Galaxy
+  hosts: dbservers
+  become: yes
+  roles:
+    - jhuijgen83.dbserver
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+Example Inventory
+-----------------
 
-License
--------
+De gebruiker moet een eigen `inventory.ini` aanmaken. Voorbeeld:
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+`example.ini`
+[dbservers]
+192.168.1.20 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa
