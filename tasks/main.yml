@@ -1,0 +1,31 @@
+---
+- name: Install required packages via apt
+  ansible.builtin.apt:
+    name:
+      - mysql-server
+      - python3-pymysql
+    state: present
+    update_cache: yes
+
+- name: Wait for MySQL socket
+  ansible.builtin.wait_for:
+    path: /var/run/mysqld/mysqld.sock
+    state: present
+    timeout: 30
+
+- name: Allow MySQL to listen on all interfaces
+  ansible.builtin.replace:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address\s*=.*'
+    replace: 'bind-address = 0.0.0.0'
+  notify: Restart MySQL
+
+- name: Ensure MySQL user exists
+  community.mysql.mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_password }}"
+    priv: "*.*:ALL"
+    host: "%"
+    state: present
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
